@@ -98,7 +98,7 @@ public class DockFX extends Application
 
     // load an image to caption the dock nodes
     Image dockImage =
-                    new Image(DockFX.class.getResource("docknode.png")
+                    new Image(DockFX.class.getResource("../docknode.png")
                                           .toExternalForm());
 
     // create and dock some prototype dock nodes to the middle of the dock pane
