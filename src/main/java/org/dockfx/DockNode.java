@@ -826,6 +826,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
                                              }
                                            };
 
+  private boolean wasFloating = false; // Holds last float value.
+
   public final boolean isFloating()
   {
     return floatingProperty.get();
@@ -1147,6 +1149,17 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     this.lastDockSibling = sibling;
   }
 
+  public void restore() {
+    if(getPrevDockPane() != null && !wasFloating) { //Docked
+      dock(getPrevDockPane(), getLastDockPos(), getLastDockSibling());
+    } else { //Floating
+      setFloating(true);
+      this.dockedProperty.set(false);
+      this.closedProperty.set(false);
+      dockPane.addFloatingNodeFromUndockNodes(this);
+    }
+  }
+
   /**
    * Dock this node into a dock pane.
    * 
@@ -1167,6 +1180,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     if (isFloating())
     {
       setFloating(false);
+      wasFloating = false;
     }
     this.prevDockPane = this.dockPane;
     this.dockPane = dockPane;
@@ -1196,6 +1210,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     this.closedProperty.set(true);
     if (isFloating())
     {
+      wasFloating = true;
       setFloating(false);
       dockPane.removeFloatingNodeFromUndockNodes(this);
     }

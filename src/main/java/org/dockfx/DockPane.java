@@ -721,6 +721,10 @@ public class DockPane extends StackPane
   {
     undockedNodes.remove(n);
   }
+  public void addFloatingNodeFromUndockNodes(DockNode n)
+  {
+    undockedNodes.add(n);
+  }
 
   @Override
   public void handle(DockEvent event)
