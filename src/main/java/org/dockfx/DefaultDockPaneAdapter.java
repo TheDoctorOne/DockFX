@@ -76,7 +76,6 @@ public class DefaultDockPaneAdapter extends DockPane {
      * Covers the anchor pane.
      * */
     public void putInsideAnchorPane(AnchorPane anchorPane) {
-        this.setStyle("-fx-background-color: black");
         anchorPane.getChildren().add(this);
         AnchorPane.setBottomAnchor(this, 0d);
         AnchorPane.setLeftAnchor(this, 0d);
