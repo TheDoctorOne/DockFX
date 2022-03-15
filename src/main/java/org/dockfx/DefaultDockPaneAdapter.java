@@ -49,7 +49,7 @@ public class DefaultDockPaneAdapter extends DockPane {
         }
         Parent parent = loader.load();
         DockNode dockNode = new DockNode(parent, dockTitle);
-        dockNode.setPrefSize(400, 300);
+        dockNode.setPrefSize(parent.prefWidth(-1), parent.prefHeight(-1));
         DockableNode controller = loader.getController();
 
         dockNode.closedProperty().addListener((observable, oldValue, newValue) -> {

@@ -463,6 +463,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
       }
 
       stage = new Stage();
+      stage.setOnCloseRequest(event -> close());
 
       dockPane.getScene()
               .getWindow()
