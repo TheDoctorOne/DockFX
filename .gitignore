@@ -12,5 +12,6 @@ dockfxdemo.jar
 target
 .gradle
 /build/
-
+.idea
+gradle/
 out
