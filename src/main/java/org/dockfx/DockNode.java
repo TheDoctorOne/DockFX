@@ -1150,9 +1150,13 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     this.lastDockSibling = sibling;
   }
 
-  public void restore() {
-    if(getPrevDockPane() != null && !wasFloating) { //Docked
-      dock(getPrevDockPane(), getLastDockPos(), getLastDockSibling());
+  /**
+   * @param dockPane Parent {@link DockPane}.
+   * @implNote <code>getPrevDockPane()</code> may return null.
+   * */
+  public void restore(DockPane dockPane) {
+    if(!wasFloating) { //Docked
+      dock(dockPane, getLastDockPos(), getLastDockSibling());
     } else { //Floating
       setFloating(true);
       this.dockedProperty.set(false);

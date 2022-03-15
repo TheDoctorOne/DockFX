@@ -1,6 +1,7 @@
 package org.dockfx.demo.controllers;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,9 +10,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.dockfx.DefaultDockPaneAdapter;
+import org.dockfx.BasicFXMLDockPaneAdapter;
 import org.dockfx.DockPane;
-import org.dockfx.DockPos;
+import org.dockfx.DockableNode;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +26,7 @@ public class DemoMainFXML extends Application implements Initializable {
     @FXML
     private Button dummyPaneButton;
 
-    private final DefaultDockPaneAdapter dockPaneAdapter = new DefaultDockPaneAdapter();
+    private final BasicFXMLDockPaneAdapter dockPaneAdapter = new BasicFXMLDockPaneAdapter();
 
     @FXML
     public void onDummyButtonClick(ActionEvent e) {
@@ -36,15 +37,17 @@ public class DemoMainFXML extends Application implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         System.out.println("initialize");
-        dockPaneAdapter.putInsideAnchorPane(dockAnchorPane);
+        dockPaneAdapter.wrapInAnchorPane(dockAnchorPane);
         try {
-            dockPaneAdapter.addDockableFXML(DemoFXML.class,"DemoFXML.fxml","DemoFXML", DockPos.CENTER,
-                    (observable, oldValue, newValue) -> {
-                        if(newValue) {
-                            //Closed
-                            dummyPaneButton.setDisable(false);
-                        }
-                    });
+            ChangeListener<? super Boolean> change = (observable, oldValue, newValue) -> {
+                if(newValue) {
+                    //Closed
+                    dummyPaneButton.setDisable(false);
+                }
+            };
+
+            DockableNode dNode = dockPaneAdapter.addDockableFXML(DemoFXML.class,"DemoFXML.fxml");
+            dNode.getCloseProperty().addListener(change);
         } catch (IOException e) {
             e.printStackTrace();
         }

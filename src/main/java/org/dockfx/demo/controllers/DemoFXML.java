@@ -1,8 +1,12 @@
 package org.dockfx.demo.controllers;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
+import org.dockfx.DockPos;
 import org.dockfx.DockableNode;
 
 import java.net.URL;
@@ -12,6 +16,8 @@ public class DemoFXML implements DockableNode,Initializable {
 
     @FXML
     private AnchorPane mainPane;
+
+    private final BooleanProperty closeProperty = new SimpleBooleanProperty(false);
 
     /**
      * Called to initialize a controller after its root element has been
@@ -23,15 +29,24 @@ public class DemoFXML implements DockableNode,Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("Initialize demofxml");
         mainPane.setStyle("-fx-background-color: blue");
     }
 
     /**
-     * On Dockable closed.
+     * On dockable closed
      */
     @Override
-    public void onClosedEvent() {
-        System.out.println("Demo FXML Closed.");
+    public BooleanProperty getCloseProperty() {
+        return closeProperty;
+    }
+
+    @Override
+    public String getDockTitle() {
+        return "Demo FXML";
+    }
+
+    @Override
+    public DockPos getDocPos() {
+        return DockPos.CENTER;
     }
 }
