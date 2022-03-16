@@ -898,19 +898,13 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     this.closableProperty.set(closable);
   }
 
-  private BooleanProperty minimizedProperty =
-                                            new SimpleBooleanProperty(false)
-                                            {
-                                              @Override
-                                              public String getName()
-                                              {
-                                                return "minimized";
-                                              }
-                                            };
-
   public final boolean isMinimized()
   {
-    return minimizedProperty.get();
+    if (null != stage) {
+      return stage.iconifiedProperty().get();
+    } else {
+      return false;
+    }
   }
 
   public final void setMinimized(boolean minimized)
@@ -918,7 +912,6 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     if (null != stage)
     {
       stage.setIconified(minimized);
-      this.minimizedProperty.set(minimized);
     }
   }
 
