@@ -4,7 +4,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,15 +21,21 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
 
     protected static class DockableFXML {
         private final String fxml;
+        private final String customTitle;
         public final Class<? extends DockableNode> mClass;
         public final DockNode dockNode;
         public final DockableNode controller;
 
-        private DockableFXML(Class<? extends DockableNode> mClass, DockableNode controller, String fxml, DockNode dockNode) {
+        private DockableFXML(String customTitle, Class<? extends DockableNode> mClass, DockableNode controller, String fxml, DockNode dockNode) {
             this.fxml = fxml;
+            this.customTitle = customTitle;
             this.dockNode = dockNode;
             this.controller = controller;
             this.mClass = mClass;
+        }
+
+        public String getTitle() {
+            return customTitle == null ? controller.getDockTitle() : customTitle;
         }
     }
 
@@ -49,6 +55,16 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
      * @return the controller object.
      * */
     public DockableNode addDockableFXML(Class<? extends DockableNode> controllerClass, String FXML) throws IOException {
+        return addDockableFXML(null, controllerClass, FXML);
+    }
+
+    /**
+     * @param title Title of the Dock. If <code>null</code> uses <code>{@link DockableNode}.getDockTitle()</code>.
+     * @param controllerClass Class of the controller will be used as key for mapping. So every FXML File is singleton.
+     * @param FXML FXML path relative to controllerClass. Will be loaded with `controllerClass.getResource`
+     * @return the controller object.
+     * */
+    public DockableNode addDockableFXML(String title, Class<? extends DockableNode> controllerClass, String FXML) throws IOException {
         FXMLLoader loader = new FXMLLoader(controllerClass.getResource(FXML));
         if(resourceBundle != null) {
             loader.setResources(resourceBundle);
@@ -57,14 +73,14 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         DockableNode controller = loader.getController();
         controller.setDockPane(this);
 
-        DockNode dockNode = new DockNode(parent, controller.getDockTitle(), controller.getGraphic());
+        DockNode dockNode = new DockNode(parent, title == null ? controller.getDockTitle() : title, controller.getGraphic());
         dockNode.setPrefSize(parent.prefWidth(-1), parent.prefHeight(-1));
 
         dockNode.closedProperty().addListener(
                 (observable, oldValue, newValue) -> controller.getCloseProperty().set(newValue)
         );
 
-        DockableFXML dockableFXML = new DockableFXML(controllerClass, controller, FXML, dockNode);
+        DockableFXML dockableFXML = new DockableFXML(title, controllerClass, controller, FXML, dockNode);
 
         dockNode.dock(this, controller.getDocPos());
         dockables.add(dockableFXML);
@@ -92,25 +108,112 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         return res;
     }
 
-    public void createNodeBar(ObservableList<Node> childrenList, boolean showText) {
+
+    public void createMenuItems(ObservableList<MenuItem> childrenList, Class<? extends MenuItem> base, boolean showText) {
+        createMenuItems(dockables, childrenList, base, showText);
+    }
+
+    public void createNodeBar(ObservableList<Node> childrenList, Class<? extends ButtonBase> base, boolean showText) {
+        createNodeBar(dockables, childrenList, base, showText);
+    }
+
+    public void createMenuItems(Class<? extends DockableNode> filter, ObservableList<MenuItem> childrenList, Class<? extends MenuItem> base, boolean showText) {
+        createMenuItems(filterList(dockables, filter), childrenList, base, showText);
+    }
+
+    public void createNodeBar(Class<? extends DockableNode> filter, ObservableList<Node> childrenList, Class<? extends ButtonBase> base, boolean showText) {
+        createNodeBar(filterList(dockables, filter), childrenList, base, showText);
+    }
+
+    private static List<DockableFXML> filterList(List<DockableFXML> dockables, Class<? extends DockableNode> filter) {
+        List<DockableFXML> res = new ArrayList<>();
         dockables.forEach(dockableFXML -> {
-            DockableNode dNode = dockableFXML.controller;
-            Button b = new Button(
-                    showText ? dNode.getDockTitle() : ""
-                    , dNode.getGraphic()
-            );
+            if(dockableFXML.mClass == filter) {
+                res.add(dockableFXML);
+            }
+        });
+        return res;
+    }
 
-            b.setOnAction(event -> {
-                if(dockableFXML.dockNode.isClosed()) {
-                    dockableFXML.dockNode.restore(dNode.getDockPane());
+    private static void createNodeBar(List<DockableFXML> dockables, ObservableList<Node> childrenList,  Class<? extends ButtonBase> base, boolean showText) {
+        dockables.forEach(dockableFXML -> {
+            try {
+                DockableNode dNode = dockableFXML.controller;
+                ButtonBase b = base.newInstance();
+                b.setText(showText ? dockableFXML.getTitle() : "");
+                b.setGraphic(dNode.getGraphic());
+
+                b.setOnAction(event -> {
+                    if (dockableFXML.dockNode.isClosed()) {
+                        dockableFXML.dockNode.restore(dNode.getDockPane());
+                    } else {
+                        dockableFXML.dockNode.close();
+                    }
+                    if(b instanceof CheckBox) {
+                        ((CheckBox)b).setSelected(!dockableFXML.dockNode.isClosed());
+                    } else {
+                        b.setDisable(!dockableFXML.dockNode.isClosed());
+                    }
+                });
+
+                dNode.getCloseProperty().addListener((observable, oldValue, newValue) -> {
+                    if(b instanceof CheckBox) {
+                        ((CheckBox)b).setSelected(!newValue);
+                    } else {
+                        b.setDisable(!newValue);
+                    }
+                });
+
+                if(b instanceof CheckBox) {
+                    ((CheckBox)b).setSelected(!dNode.getCloseProperty().getValue());
+                } else {
+                    b.setDisable(!dNode.getCloseProperty().getValue());
                 }
-                b.setDisable(true);
-            });
+                childrenList.add(b);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-            dNode.getCloseProperty().addListener((observable, oldValue, newValue) -> b.setDisable(!newValue));
+    private static void createMenuItems(List<DockableFXML> dockables, ObservableList<MenuItem> childrenList, Class<? extends MenuItem> base, boolean showText) {
+        dockables.forEach(dockableFXML -> {
+            try {
+                DockableNode dNode = dockableFXML.controller;
+                MenuItem b = base.newInstance();
+                b.setText(showText ? dockableFXML.getTitle() : "");
+                b.setGraphic(dNode.getGraphic());
 
-            b.setDisable(!dNode.getCloseProperty().getValue());
-            childrenList.add(b);
+                b.setOnAction(event -> {
+                    if (dockableFXML.dockNode.isClosed()) {
+                        dockableFXML.dockNode.restore(dNode.getDockPane());
+                    } else {
+                        dockableFXML.dockNode.close();
+                    }
+                    if(b instanceof CheckMenuItem) {
+                        ((CheckMenuItem)b).setSelected(!dockableFXML.dockNode.isClosed());
+                    } else {
+                        b.setDisable(!dockableFXML.dockNode.isClosed());
+                    }
+                });
+
+                dNode.getCloseProperty().addListener((observable, oldValue, newValue) -> {
+                    if(b instanceof CheckMenuItem) {
+                        ((CheckMenuItem)b).setSelected(!newValue);
+                    } else {
+                        b.setDisable(!newValue);
+                    }
+                });
+
+                if(b instanceof CheckMenuItem) {
+                    ((CheckMenuItem)b).setSelected(!dNode.getCloseProperty().getValue());
+                } else {
+                    b.setDisable(!dNode.getCloseProperty().getValue());
+                }
+                childrenList.add(b);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -126,16 +229,12 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         });
     }
 
-    public void createNodeBar(VBox vBox, double spacing, boolean showText) {
-        vBox.getChildren().clear();
-        vBox.setSpacing(spacing);
-        createNodeBar(vBox.getChildren(), showText);
+    public void createNodeBar(VBox vBox, Class<? extends ButtonBase> base, boolean showText) {
+        createNodeBar(vBox.getChildren(), base, showText);
     }
 
-    public void createNodeBar(HBox hBox, double spacing, boolean showText) {
-        hBox.getChildren().clear();
-        hBox.setSpacing(spacing);
-        createNodeBar(hBox.getChildren(), showText);
+    public void createNodeBar(HBox hBox, Class<? extends ButtonBase> base, boolean showText) {
+        createNodeBar(hBox.getChildren(), base, showText);
     }
 
     /**
