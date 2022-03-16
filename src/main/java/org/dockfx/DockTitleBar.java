@@ -415,6 +415,10 @@ public class DockTitleBar extends HBox
     {
       if (!dockNode.isFloating())
       {
+        if(!dockNode.isFloatable()){
+          event.consume();
+          return;
+        }
         // if we are not using a custom title bar and the user
         // is not forcing the default one for floating and
         // the dock node does have native window decorations

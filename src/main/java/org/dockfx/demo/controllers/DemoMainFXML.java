@@ -20,6 +20,7 @@ import org.dockfx.demo.DockFX;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DemoMainFXML extends Application implements Initializable {
@@ -50,6 +51,14 @@ public class DemoMainFXML extends Application implements Initializable {
             DockableNode dNode = dockPaneAdapter.addDockableFXML("Demo1", DemoFXML.class, "DemoFXML.fxml");
             dockPaneAdapter.addDockableFXML("Demo2", DemoFXML.class, "DemoFXML.fxml");
             dockPaneAdapter.createMenuItems(DemoFXML.class, menu.getItems(), CheckMenuItem.class, true);
+
+            List<BasicFXMLDockPaneAdapter.DockableFXML> dFxml = dockPaneAdapter.getDockableFXML(DemoFXML.class);
+
+            dFxml.forEach(dockableFXML -> {
+                if(dockableFXML.controller == dNode) {
+                    dockableFXML.dockNode.setFloatable(false);
+                }
+            });
 
 
         } catch (IOException e) {

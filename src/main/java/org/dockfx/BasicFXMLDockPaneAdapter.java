@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
  * */
 public class BasicFXMLDockPaneAdapter extends DockPane {
 
-    protected static class DockableFXML {
+    public static class DockableFXML {
         private final String fxml;
         private final String customTitle;
         public final Class<? extends DockableNode> mClass;
@@ -112,6 +112,18 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         });
         return res;
     }
+
+
+    public List<DockableFXML> getDockableFXML(Class<? extends DockableNode> nodeClass) {
+        List<DockableFXML> res = new ArrayList<>();
+        dockables.forEach(dockableFXML -> {
+            if(dockableFXML.mClass == nodeClass) {
+                res.add(dockableFXML);
+            }
+        });
+        return res;
+    }
+
 
 
     public void createMenuItems(ObservableList<MenuItem> childrenList, Class<? extends MenuItem> base, boolean showText) {
