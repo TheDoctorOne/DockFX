@@ -473,6 +473,10 @@ public class DockPane extends StackPane
       pane = new ContentSplitPane(node);
       root = (Node) pane;
       this.getChildren().add(root);
+      if (undockedNodes.contains(node))
+      {
+        undockedNodes.remove(node);
+      }
       return;
     }
 
@@ -953,19 +957,22 @@ public class DockPane extends StackPane
       contents.get("_FloatingNodes").addChild(floatingNode);
     }
 
-    // Prepare Docking Nodes collection
-    List<DockNode> dockingNodes = new LinkedList<>();
 
-    Integer count = 0;
+    if(pane != null) { // Check if root frame is there.
+      // Prepare Docking Nodes collection
+      List<DockNode> dockingNodes = new LinkedList<>();
 
-    checkPane(contents, pane, dockingNodes, count);
+      Integer count = 0;
 
-    contents.get("0").addProperty("Size", new Double[]
-    { this.getScene().getWindow().getWidth(),
-      this.getScene().getWindow().getHeight() });
-    contents.get("0").addProperty("Position", new Double[]
-    { this.getScene().getWindow().getX(),
-      this.getScene().getWindow().getY() });
+      checkPane(contents, pane, dockingNodes, count);
+
+      contents.get("0").addProperty("Size", new Double[]
+              {this.getScene().getWindow().getWidth(),
+                      this.getScene().getWindow().getHeight()});
+      contents.get("0").addProperty("Position", new Double[]
+              {this.getScene().getWindow().getX(),
+                      this.getScene().getWindow().getY()});
+    }
 
     // Try to write layout to file.
     try (
@@ -1119,38 +1126,36 @@ public class DockPane extends StackPane
     }
 
     collectDockNodes(dockNodes, root);
+    if(contents.containsKey("0")) {
+      Double[] windowSize = (Double[]) contents.get("0")
+              .getProperties()
+              .get("Size");
+      Double[] windowPosition = (Double[]) contents.get("0")
+              .getProperties()
+              .get("Position");
 
-    Double[] windowSize = (Double[]) contents.get("0")
-                                             .getProperties()
-                                             .get("Size");
-    Double[] windowPosition = (Double[]) contents.get("0")
-                                                 .getProperties()
-                                                 .get("Position");
+      Stage currentStage = (Stage) this.getScene().getWindow();
 
-    Stage currentStage = (Stage) this.getScene().getWindow();
+      // In case that the current screen size is smaller than the size stored in
+      // the preference file,
+      // The below logic prevents from the window hidden in outside the current
+      // screen
+      Rectangle2D screen = Screen.getPrimary().getBounds();
 
-    // In case that the current screen size is smaller than the size stored in
-    // the preference file,
-    // The below logic prevents from the window hidden in outside the current
-    // screen
-	Rectangle2D screen = Screen.getPrimary().getBounds();
+      if (windowPosition[0] > screen.getMaxX()) {
+        windowPosition[0] = currentStage.getX();
+      }
 
-    if (windowPosition[0] > screen.getMaxX())
-    {
-      windowPosition[0] = currentStage.getX();
+      if (windowPosition[1] > screen.getMaxY()) {
+        windowPosition[1] = currentStage.getY();
+      }
+
+      currentStage.setX(windowPosition[0]);
+      currentStage.setY(windowPosition[1]);
+
+      currentStage.setWidth(windowSize[0]);
+      currentStage.setHeight(windowSize[1]);
     }
-
-    if (windowPosition[1] > screen.getMaxY())
-    {
-      windowPosition[1] = currentStage.getY();
-    }
-
-    currentStage.setX(windowPosition[0]);
-    currentStage.setY(windowPosition[1]);
-
-    currentStage.setWidth(windowSize[0]);
-    currentStage.setHeight(windowSize[1]);
-
     // Set floating docks according to the preference data
     for (Object item : contents.get("_FloatingNodes").getChildren())
     {
@@ -1186,31 +1191,36 @@ public class DockPane extends StackPane
       }
     }
 
-    // Restore dock location based on the preferences
-    // Make it sorted
-    ContentHolder rootHolder = contents.get("0");
-    Node newRoot = buildPane(null,
-                             rootHolder,
-                             dockNodes,
-                             delayOpenHandler);
 
-    // We have new dock nodes to be added, otherwise we will lose the new nodes
-    if (dockNodes.size() > 0)
-    {
-      for (String title : dockNodes.keySet())
-      {
-        DockNode node = dockNodes.get(title);
-        node.setFloating(true, null, this);
+    if(contents.containsKey("0")) {
+      // Restore dock location based on the preferences
+      // Make it sorted
+      ContentHolder rootHolder = contents.get("0");
+      Node newRoot = buildPane(null,
+              rootHolder,
+              dockNodes,
+              delayOpenHandler);
 
-        node.getStage().setX(node.getStage().getX() + 100);
-        node.getStage().setY(node.getStage().getY() + 100);
+      // We have new dock nodes to be added, otherwise we will lose the new nodes
+      if (dockNodes.size() > 0) {
+        for (String title : dockNodes.keySet()) {
+          DockNode node = dockNodes.get(title);
+          node.setFloating(true, null, this);
+
+          node.getStage().setX(node.getStage().getX() + 100);
+          node.getStage().setY(node.getStage().getY() + 100);
+        }
+
+        dockNodes.clear();
       }
 
-      dockNodes.clear();
+      this.root = newRoot;
+      if(this.getChildren().size() > 0) {
+        this.getChildren().set(0, this.root);
+      } else {
+        this.getChildren().add(this.root);
+      }
     }
-
-    this.root = newRoot;
-    this.getChildren().set(0, this.root);
   }
 
   private Node buildPane(ContentPane parent,
