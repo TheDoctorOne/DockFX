@@ -17,7 +17,7 @@ DockFX has a number of features:
 * CSS and styling support
 * FXML support 
 
-This version does suppport FXML to some extend. See [DefaultDockPaneAdapter](https://github.com/TheDoctorOne/DockFX/blob/master/src/main/java/org/dockfx/DefaultDockPaneAdapter.java) and [Demo/DemoMainFXML](https://github.com/TheDoctorOne/DockFX/blob/master/src/main/java/org/dockfx/demo/controllers/DemoMainFXML.java) for further information.
+This version does suppport FXML to some extend. See [BasicFXMLDockPaneAdapter](https://github.com/TheDoctorOne/DockFX/blob/master/src/main/java/org/dockfx/BasicFXMLDockPaneAdapter.java) and [Demo/DemoMainFXML](https://github.com/TheDoctorOne/DockFX/blob/master/src/main/java/org/dockfx/demo/controllers/DemoMainFXML.java) for further information.
 
 Features to be added in a to be determined future version:
 * Scene builder integration
