@@ -32,6 +32,7 @@ public class DemoMainFXML extends Application implements Initializable {
         dockPaneAdapter.wrapInAnchorPane(dockAnchorPane);
         try {
             DockableNode dNode = dockPaneAdapter.addDockableFXML(DemoFXML.class,"DemoFXML.fxml");
+            DockableNode dNode3 = dockPaneAdapter.addDockableFXML(DemoFXML.class,"DemoFXML.fxml");
             DockableNode dNode2 = dockPaneAdapter.addDockableFXML(DemoFXML2.class,"DemoFXML2.fxml");
         } catch (IOException e) {
             e.printStackTrace();

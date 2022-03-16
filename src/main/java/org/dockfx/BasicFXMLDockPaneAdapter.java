@@ -1,38 +1,40 @@
 package org.dockfx;
 
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Loads from FXML.
  * */
 public class BasicFXMLDockPaneAdapter extends DockPane {
 
-    private static class DockableFXML {
+    protected static class DockableFXML {
         private final String fxml;
+        public final Class<? extends DockableNode> mClass;
         public final DockNode dockNode;
         public final DockableNode controller;
 
-        private DockableFXML(DockableNode controller, String fxml, DockNode dockNode) {
+        private DockableFXML(Class<? extends DockableNode> mClass, DockableNode controller, String fxml, DockNode dockNode) {
             this.fxml = fxml;
             this.dockNode = dockNode;
             this.controller = controller;
+            this.mClass = mClass;
         }
     }
 
-    private final Map<Class<? extends DockableNode>, DockableFXML> dockables = new HashMap<>();
-    private ResourceBundle resourceBundle;
+    protected final List<DockableFXML> dockables = new ArrayList<>();
+    protected ResourceBundle resourceBundle;
 
     /**
      * FXMLs will use this resourceBundle. Set this first, will not update previously loaded FXMLs.
@@ -62,26 +64,36 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
                 (observable, oldValue, newValue) -> controller.getCloseProperty().set(newValue)
         );
 
-        DockableFXML dockableFXML = new DockableFXML(controller, FXML, dockNode);
+        DockableFXML dockableFXML = new DockableFXML(controllerClass, controller, FXML, dockNode);
 
         dockNode.dock(this, controller.getDocPos());
-        dockables.put(controllerClass, dockableFXML);
+        dockables.add(dockableFXML);
 
         return controller;
     }
 
-    public DockableNode getDockableNode(Class<? extends  DockableNode> nodeClass) {
-        DockableFXML obj = dockables.get(nodeClass);
-        return obj != null ? obj.controller : null;
+    public List<DockableNode> getDockableNode(Class<? extends  DockableNode> nodeClass) {
+        ArrayList<DockableNode> res = new ArrayList<>();
+        dockables.forEach(dockableFXML -> {
+            if(dockableFXML.mClass == nodeClass) {
+                res.add(dockableFXML.controller);
+            }
+        });
+        return res;
     }
 
-    public DockNode getDockNode(Class<? extends  DockableNode> nodeClass) {
-        DockableFXML obj = dockables.get(nodeClass);
-        return obj != null ? obj.dockNode : null;
+    public List<DockNode> getDockNode(Class<? extends  DockableNode> nodeClass) {
+        ArrayList<DockNode> res = new ArrayList<>();
+        dockables.forEach(dockableFXML -> {
+            if(dockableFXML.mClass == nodeClass) {
+                res.add(dockableFXML.dockNode);
+            }
+        });
+        return res;
     }
 
     public void createNodeBar(ObservableList<Node> childrenList, boolean showText) {
-        dockables.values().forEach(dockableFXML -> {
+        dockables.forEach(dockableFXML -> {
             DockableNode dNode = dockableFXML.controller;
             Button b = new Button(
                     showText ? dNode.getDockTitle() : ""
@@ -99,6 +111,18 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
 
             b.setDisable(!dNode.getCloseProperty().getValue());
             childrenList.add(b);
+        });
+    }
+
+    public void closeAll() {
+        dockables.forEach(dockableFXML -> dockableFXML.dockNode.close());
+    }
+
+    public void closeFloating() {
+        dockables.forEach(dockableFXML -> {
+            if(dockableFXML.dockNode.isFloating()) {
+                dockableFXML.dockNode.close();
+            }
         });
     }
 
@@ -126,11 +150,12 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
     }
 
     public void showIfClosed(Class<? extends  DockableNode> nodeClass) {
-        DockNode dockNode = getDockNode(nodeClass);
-        if(dockNode != null) {
-            if(dockNode.isClosed()) {
-                dockNode.restore(this);
+        getDockNode(nodeClass).forEach(dockNode -> {
+            if (dockNode != null) {
+                if (dockNode.isClosed()) {
+                    dockNode.restore(this);
+                }
             }
-        }
+        });
     }
 }
