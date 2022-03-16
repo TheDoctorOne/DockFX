@@ -1,14 +1,18 @@
 package org.dockfx;
 
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.Button;
+import javafx.scene.layout.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Loads from FXML.
@@ -49,6 +53,7 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         }
         Parent parent = loader.load();
         DockableNode controller = loader.getController();
+        controller.setDockPane(this);
 
         DockNode dockNode = new DockNode(parent, controller.getDockTitle(), controller.getGraphic());
         dockNode.setPrefSize(parent.prefWidth(-1), parent.prefHeight(-1));
@@ -69,9 +74,44 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         DockableFXML obj = dockables.get(nodeClass);
         return obj != null ? obj.controller : null;
     }
+
     public DockNode getDockNode(Class<? extends  DockableNode> nodeClass) {
         DockableFXML obj = dockables.get(nodeClass);
         return obj != null ? obj.dockNode : null;
+    }
+
+    public void createNodeBar(ObservableList<Node> childrenList, boolean showText) {
+        dockables.values().forEach(dockableFXML -> {
+            DockableNode dNode = dockableFXML.controller;
+            Button b = new Button(
+                    showText ? dNode.getDockTitle() : ""
+                    , dNode.getGraphic()
+            );
+
+            b.setOnAction(event -> {
+                if(dockableFXML.dockNode.isClosed()) {
+                    dockableFXML.dockNode.restore(dNode.getDockPane());
+                }
+                b.setDisable(true);
+            });
+
+            dNode.getCloseProperty().addListener((observable, oldValue, newValue) -> b.setDisable(!newValue));
+
+            b.setDisable(!dNode.getCloseProperty().getValue());
+            childrenList.add(b);
+        });
+    }
+
+    public void createNodeBar(VBox vBox, double spacing, boolean showText) {
+        vBox.getChildren().clear();
+        vBox.setSpacing(spacing);
+        createNodeBar(vBox.getChildren(), showText);
+    }
+
+    public void createNodeBar(HBox hBox, double spacing, boolean showText) {
+        hBox.getChildren().clear();
+        hBox.setSpacing(spacing);
+        createNodeBar(hBox.getChildren(), showText);
     }
 
     /**

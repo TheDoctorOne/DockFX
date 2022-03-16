@@ -518,7 +518,7 @@ public class DockPane extends StackPane
         ContentSplitPane siblingSplitPane =
                                           (ContentSplitPane) sibling;
 
-        ContentPane parent = siblingSplitPane.getContentParent();
+        ContentPane parent = siblingSplitPane != null ? siblingSplitPane.getContentParent() : null;
         if (parent == null)
         {
           Node child = siblingSplitPane.getChildrenList().get(0);

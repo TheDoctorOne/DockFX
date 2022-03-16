@@ -1,7 +1,6 @@
 package org.dockfx.demo.controllers;
 
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,7 +12,7 @@ import org.dockfx.DockableNode;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class DemoFXML implements DockableNode,Initializable {
+public class DemoFXML2 implements DockableNode,Initializable {
 
     @FXML
     private AnchorPane mainPane;
@@ -32,7 +31,7 @@ public class DemoFXML implements DockableNode,Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        mainPane.setStyle("-fx-background-color: YE");
+        mainPane.setStyle("-fx-background-color: blue");
     }
 
     /**
@@ -45,7 +44,7 @@ public class DemoFXML implements DockableNode,Initializable {
 
     @Override
     public String getDockTitle() {
-        return "Demo FXML";
+        return "Demo FXML2";
     }
 
     @Override

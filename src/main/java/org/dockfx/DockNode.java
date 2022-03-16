@@ -1156,7 +1156,11 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
    * */
   public void restore(DockPane dockPane) {
     if(!wasFloating) { //Docked
-      dock(dockPane, getLastDockPos(), getLastDockSibling());
+      if(getLastDockSibling() != null) {
+        dock(dockPane, getLastDockPos(), getLastDockSibling());
+      } else {
+        dock(dockPane, getLastDockPos());
+      }
     } else { //Floating
       setFloating(true);
       this.dockedProperty.set(false);

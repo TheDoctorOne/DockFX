@@ -27,9 +27,15 @@ public interface DockableNode {
 
     DockPos getDocPos();
 
+    void setDockPane(DockPane dockPane);
+
+    DockPane getDockPane();
+
     /**
      * Dockable's Icon
      * */
-    default ImageView getGraphic() { return null; }
+    default ImageView getGraphic() {
+        return new ImageView(DockPane.class.getResource("docknode.png").toExternalForm());
+    }
 
 }
