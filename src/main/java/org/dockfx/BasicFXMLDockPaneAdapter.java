@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -70,6 +71,10 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
             loader.setResources(resourceBundle);
         }
         Parent parent = loader.load();
+        if(parent instanceof Region) { // This causes issues, when set, while managing tabs.
+            ((Region) parent).setMinHeight(0);
+            ((Region) parent).setMinWidth(0);
+        }
         DockableNode controller = loader.getController();
         controller.setDockPane(this);
 
