@@ -25,7 +25,7 @@ public class DemoFXML extends AbstractDockableNode implements DockableNode,Initi
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        mainPane.setStyle("-fx-background-color: YE");
+        mainPane.setStyle("-fx-background-color: darkslateblue");
     }
 
     /**

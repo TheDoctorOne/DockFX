@@ -1047,12 +1047,22 @@ public class DockPane extends StackPane
     return holder;
   }
 
-  public void loadPreference(String filePath)
+  public void loadPreference(String filePath) //Backwards comp.
   {
-    loadPreference(filePath, null);
+    loadPreference(filePath, true, null);
+  }
+
+  /**
+   * @param filePath Preference file
+   * @param keepNonFound Keep the dockPanes those are not found inside the preference file.
+   * */
+  public void loadPreference(String filePath, boolean keepNonFound)
+  {
+    loadPreference(filePath, keepNonFound, null);
   }
 
   public void loadPreference(String filePath,
+                             boolean keepNonFound,
                              DelayOpenHandler delayOpenHandler)
   {
     HashMap<String, ContentHolder> contents = null;
@@ -1091,7 +1101,7 @@ public class DockPane extends StackPane
 
     if (contents != null)
     {
-      applyPane(contents, (ContentPane) root, delayOpenHandler);
+      applyPane(contents, (ContentPane) root, keepNonFound, delayOpenHandler);
     }
   }
 
@@ -1114,6 +1124,7 @@ public class DockPane extends StackPane
 
   private void applyPane(HashMap<String, ContentHolder> contents,
                          ContentPane root,
+                         boolean keepNonFound,
                          DelayOpenHandler delayOpenHandler)
   {
     // Collect the current pane information
@@ -1205,10 +1216,14 @@ public class DockPane extends StackPane
       if (dockNodes.size() > 0) {
         for (String title : dockNodes.keySet()) {
           DockNode node = dockNodes.get(title);
-          node.setFloating(true, null, this);
+          if(keepNonFound) {
+            node.setFloating(true, null, this);
 
-          node.getStage().setX(node.getStage().getX() + 100);
-          node.getStage().setY(node.getStage().getY() + 100);
+            node.getStage().setX(node.getStage().getX() + 100);
+            node.getStage().setY(node.getStage().getY() + 100);
+          } else {
+            node.close();
+          }
         }
 
         dockNodes.clear();
@@ -1219,6 +1234,17 @@ public class DockPane extends StackPane
         this.getChildren().set(0, this.root);
       } else {
         this.getChildren().add(this.root);
+      }
+    } else { // Save file does not contain root!.
+      for(DockNode node : dockNodes.values()) {
+        if(keepNonFound) {
+          node.setFloating(true, null, this);
+
+          node.getStage().setX(node.getStage().getX() + 100);
+          node.getStage().setY(node.getStage().getY() + 100);
+        } else {
+          node.close();
+        }
       }
     }
   }
