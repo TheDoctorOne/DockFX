@@ -101,6 +101,14 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
   private double yPosBeforeMaximizing;
 
   /**
+   * Keep window state before its minimizing.
+   */
+  private double widthBeforeMinimizing = -1;
+  private double heightBeforeMinimizing = -1;
+  private double xPosBeforeMinimizing = -1;
+  private double yPosBeforeMinimizing = -1;
+
+  /**
    * CSS pseudo class selector representing whether this node is currently
    * floating.
    */
@@ -449,6 +457,11 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
         dockPane = newDockPane;
       }
 
+      if(widthBeforeMaximizing == -1) {
+        heightBeforeMinimizing = getHeight();
+        widthBeforeMinimizing = getWidth();
+      }
+
       // position the new stage relative to the old scene offset
       Point2D floatScene = this.localToScene(0, 0);
       Point2D floatScreen = this.localToScreen(0, 0);
@@ -464,6 +477,14 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
 
       stage = new Stage();
       stage.setOnCloseRequest(event -> close());
+      stage.iconifiedProperty().addListener((observable, oldValue, newValue) -> {
+        if(newValue) { // Just before minimizing.
+          widthBeforeMinimizing = stage.getWidth();
+          heightBeforeMinimizing = stage.getHeight();
+          xPosBeforeMinimizing = stage.getX();
+          yPosBeforeMinimizing = stage.getY();
+        }
+      });
 
       dockPane.getScene()
               .getWindow()
@@ -499,10 +520,14 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
         stagePosition = floatScene.add(new Point2D(owner.getX(),
                                                    owner.getY()));
       }
-      else if (floatScreen != null)
+      else if (floatScreen != null && !Double.isNaN(floatScreen.getX()))
       {
         // using coordinates the component was previously in (if available)
         stagePosition = floatScreen;
+      }
+      else if(xPosBeforeMinimizing != -1)
+      {
+        stagePosition = new Point2D(xPosBeforeMinimizing, yPosBeforeMinimizing);
       }
       else
       {
@@ -545,7 +570,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
       borderPane.getStyleClass().add("dock-node-border");
       borderPane.setCenter(this);
 
-      Scene scene = new Scene(borderPane);
+      Scene scene = new Scene(borderPane, widthBeforeMinimizing, heightBeforeMinimizing);
 
       // apply the floating property so we can get its padding size
       // while it is floating to offset it by the drop shadow
@@ -1183,6 +1208,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     {
       setFloating(false);
       wasFloating = false;
+      this.widthBeforeMinimizing = -1;
+      this.heightBeforeMinimizing = -1;
     }
     this.prevDockPane = this.dockPane;
     this.dockPane = dockPane;
