@@ -176,6 +176,8 @@ public class ContentSplitPane extends SplitPane implements ContentPane
       }
     }
 
+    double dividerRatio = node instanceof DockNode ? ((DockNode) node).getScreenDivideRatioOnDock() / 2 : 1;
+
     if (dockPos == DockPos.LEFT || dockPos == DockPos.TOP)
     {
       int relativeIndex = 0;
@@ -193,14 +195,16 @@ public class ContentSplitPane extends SplitPane implements ContentPane
           setDividerPosition(relativeIndex,
                              node.prefWidth(0)
                                             / (magnitude
-                                               + node.prefWidth(0)));
+                                               + node.prefWidth(0))
+                                     / dividerRatio);
         }
         else
         {
           setDividerPosition(relativeIndex,
                              node.prefHeight(0)
                                             / (magnitude
-                                               + node.prefHeight(0)));
+                                               + node.prefHeight(0))
+                                     / dividerRatio);
         }
       }
     }
@@ -219,13 +223,15 @@ public class ContentSplitPane extends SplitPane implements ContentPane
         {
           setDividerPosition(relativeIndex - 1,
                              1 - node.prefWidth(0)
-                                 / (magnitude + node.prefWidth(0)));
+                                 / (magnitude + node.prefWidth(0))
+                                     / dividerRatio);
         }
         else
         {
           setDividerPosition(relativeIndex - 1,
                              1 - node.prefHeight(0)
-                                 / (magnitude + node.prefHeight(0)));
+                                 / (magnitude + node.prefHeight(0))
+                                     / dividerRatio);
         }
       }
     }

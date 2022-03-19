@@ -109,6 +109,11 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
   private double yPosBeforeMinimizing = -1;
 
   /**
+   * Divide ratio when docking to the DockPane.
+   * */
+  private double screenDivideRatioOnDock = 2;
+
+  /**
    * CSS pseudo class selector representing whether this node is currently
    * floating.
    */
@@ -390,6 +395,21 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     this.getChildren().set(this.getChildren().indexOf(this.contents),
                            contents);
     this.contents = contents;
+  }
+
+  /**
+   * Set the divider ratio when docking.
+   * @param screenDivideRatioOnDock new divide ratio, should be >= 2
+   * */
+  public void setScreenDivideRatioOnDock(double screenDivideRatioOnDock) {
+    this.screenDivideRatioOnDock = screenDivideRatioOnDock;
+  }
+
+  /**
+   * @return current the divide ratio.
+   * */
+  public double getScreenDivideRatioOnDock() {
+    return screenDivideRatioOnDock;
   }
 
   /**

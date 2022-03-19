@@ -55,9 +55,7 @@ public class DemoMainFXML extends Application implements Initializable {
             List<BasicFXMLDockPaneAdapter.DockableFXML> dFxml = dockPaneAdapter.getDockableFXML(DemoFXML.class);
 
             dFxml.forEach(dockableFXML -> {
-                if(dockableFXML.controller == dNode) {
-                    dockableFXML.dockNode.setFloatable(false);
-                }
+                dockableFXML.dockNode.setScreenDivideRatioOnDock(10);
             });
 
 

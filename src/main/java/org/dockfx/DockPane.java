@@ -799,6 +799,8 @@ public class DockPane extends StackPane
         }
       }
 
+      double divideRatio = ((DockNode) event.getContents()).getScreenDivideRatioOnDock();
+
       if (dockPosDrag != null && dockAreaDrag != null)
       {
         Point2D originToScene = dockAreaDrag.localToScreen(0, 0);
@@ -807,11 +809,12 @@ public class DockPane extends StackPane
         dockAreaIndicator.relocate(originToScene.getX()
                                    - dockIndicatorOverlay.getAnchorX(),
                                    originToScene.getY() - dockIndicatorOverlay.getAnchorY());
+
+
         if (dockPosDrag == DockPos.RIGHT)
         {
-          dockAreaIndicator.setTranslateX(dockAreaDrag.getLayoutBounds()
-                                                      .getWidth()
-                                          / 2);
+          dockAreaIndicator.setTranslateX(dockAreaDrag.getLayoutBounds().getWidth()
+                  - dockAreaDrag.getLayoutBounds().getWidth()/divideRatio);
         }
         else
         {
@@ -820,9 +823,9 @@ public class DockPane extends StackPane
 
         if (dockPosDrag == DockPos.BOTTOM)
         {
-          dockAreaIndicator.setTranslateY(dockAreaDrag.getLayoutBounds()
-                                                      .getHeight()
-                                          / 2);
+          dockAreaIndicator.setTranslateY(dockAreaDrag.getLayoutBounds().getHeight()
+                  - dockAreaDrag.getLayoutBounds().getHeight()/divideRatio
+          );
         }
         else
         {
@@ -834,7 +837,7 @@ public class DockPane extends StackPane
         {
           dockAreaIndicator.setWidth(dockAreaDrag.getLayoutBounds()
                                                  .getWidth()
-                                     / 2);
+                                     / divideRatio);
         }
         else
         {
@@ -846,7 +849,7 @@ public class DockPane extends StackPane
         {
           dockAreaIndicator.setHeight(dockAreaDrag.getLayoutBounds()
                                                   .getHeight()
-                                      / 2);
+                                      / divideRatio);
         }
         else
         {
