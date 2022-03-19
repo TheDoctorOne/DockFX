@@ -43,7 +43,8 @@ public class DemoMainFXML extends Application implements Initializable {
         dockPaneAdapter.wrapInAnchorPane(dockAnchorPane);
         try {
             dockPaneAdapter.addDockableFXML(DemoFXML2.class, "DemoFXML2.fxml");
-            dockPaneAdapter.addDockableFXML("FXML2", DemoFXML2.class, "DemoFXML2.fxml");
+            double customDivideRatio = 5;
+            dockPaneAdapter.addDockableFXML("FXML2", customDivideRatio, DemoFXML2.class, "DemoFXML2.fxml");
             dummyBar.setSpacing(3);
             dummyBar.getChildren().clear();
             dockPaneAdapter.createNodeBar(dummyBar, Button.class, false);
@@ -54,9 +55,8 @@ public class DemoMainFXML extends Application implements Initializable {
 
             List<BasicFXMLDockPaneAdapter.DockableFXML> dFxml = dockPaneAdapter.getDockableFXML(DemoFXML.class);
 
-            dFxml.forEach(dockableFXML -> {
-                dockableFXML.dockNode.setScreenDivideRatioOnDock(10);
-            });
+            // Update divide ratio after dock.
+            dNode.getDockNode().setScreenDivideRatioOnDock(4);
 
 
         } catch (IOException e) {

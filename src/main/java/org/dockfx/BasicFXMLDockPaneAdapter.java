@@ -58,7 +58,6 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
     public DockableNode addDockableFXML(Class<? extends DockableNode> controllerClass, String FXML) throws IOException {
         return addDockableFXML(null, controllerClass, FXML);
     }
-
     /**
      * @param title Title of the Dock. If <code>null</code> uses <code>{@link DockableNode}.getDockTitle()</code>.
      * @param controllerClass Class of the controller will be used as key for mapping. So every FXML File is singleton.
@@ -66,6 +65,17 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
      * @return the controller object.
      * */
     public DockableNode addDockableFXML(String title, Class<? extends DockableNode> controllerClass, String FXML) throws IOException {
+        return addDockableFXML(title, 2, controllerClass, FXML);
+    }
+
+    /**
+     * @param title Title of the Dock. If <code>null</code> uses <code>{@link DockableNode}.getDockTitle()</code>.
+     * @param divideRatio The divide ratio of this dock. Should be higher or equal to 2. (Default is 2 means half.)
+     * @param controllerClass Class of the controller will be used as key for mapping. So every FXML File is singleton.
+     * @param FXML FXML path relative to controllerClass. Will be loaded with `controllerClass.getResource`
+     * @return the controller object.
+     * */
+    public DockableNode addDockableFXML(String title, double divideRatio, Class<? extends DockableNode> controllerClass, String FXML) throws IOException {
         FXMLLoader loader = new FXMLLoader(controllerClass.getResource(FXML));
         if(resourceBundle != null) {
             loader.setResources(resourceBundle);
@@ -80,6 +90,8 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
 
         DockNode dockNode = new DockNode(parent, title == null ? controller.getDockTitle() : title, controller.getGraphic());
         dockNode.setPrefSize(parent.prefWidth(-1), parent.prefHeight(-1));
+        dockNode.setScreenDivideRatioOnDock(divideRatio);
+        controller.setDockNode(dockNode);
 
         dockNode.closedProperty().addListener(
                 (observable, oldValue, newValue) -> controller.getCloseProperty().set(newValue)

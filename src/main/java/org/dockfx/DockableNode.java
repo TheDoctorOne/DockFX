@@ -27,6 +27,16 @@ public interface DockableNode {
 
     DockPos getDocPos();
 
+    /**
+     * Owning dock node.
+     * */
+    void setDockNode(DockNode dockNode);
+
+    /**
+     * @return Owning dock node.
+     * */
+    DockNode getDockNode();
+
     void setDockPane(DockPane dockPane);
 
     DockPane getDockPane();

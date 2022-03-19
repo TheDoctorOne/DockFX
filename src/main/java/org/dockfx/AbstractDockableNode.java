@@ -7,6 +7,7 @@ public abstract class AbstractDockableNode implements DockableNode {
 
     protected BooleanProperty closeProperty = new SimpleBooleanProperty(false);
     protected DockPane mDockPane;
+    protected DockNode mDockNode;
 
     @Override
     public BooleanProperty getCloseProperty() {
@@ -21,5 +22,23 @@ public abstract class AbstractDockableNode implements DockableNode {
     @Override
     public DockPane getDockPane() {
         return mDockPane;
+    }
+
+    /**
+     * Owning dock node.
+     *
+     * @param dockNode
+     */
+    @Override
+    public void setDockNode(DockNode dockNode) {
+        mDockNode = dockNode;
+    }
+
+    /**
+     * @return Owning dock node.
+     */
+    @Override
+    public DockNode getDockNode() {
+        return mDockNode;
     }
 }
