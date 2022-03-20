@@ -20,13 +20,9 @@
 
 package org.dockfx;
 
-import java.util.HashMap;
-import java.util.Stack;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import com.sun.javafx.stage.StageHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -43,7 +39,8 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import com.sun.javafx.stage.StageHelper;
+import java.util.HashMap;
+import java.util.Stack;
 
 /**
  * Base class for a dock node title bar that provides the mouse dragging
@@ -83,42 +80,22 @@ public class DockTitleBar extends HBox
     label.graphicProperty().bind(dockNode.graphicProperty());
 
     stateButton = new Button();
-    stateButton.setOnAction(new EventHandler<ActionEvent>()
-    {
-      @Override
-      public void handle(ActionEvent event)
+    stateButton.setOnAction(event -> {
+      if (dockNode.isFloating())
       {
-        if (dockNode.isFloating())
-        {
-          dockNode.setMaximized(!dockNode.isMaximized());
-        }
-        else
-        {
-          dockNode.setFloating(true);
-        }
+        dockNode.setMaximized(!dockNode.isMaximized());
+      }
+      else
+      {
+        dockNode.setFloating(true);
       }
     });
 
     closeButton = new Button();
-    closeButton.setOnAction(new EventHandler<ActionEvent>()
-    {
-
-      @Override
-      public void handle(ActionEvent event)
-      {
-        dockNode.close();
-      }
-    });
+    closeButton.setOnAction(event -> dockNode.close());
 
     minimizeButton = new Button();
-    minimizeButton.setOnAction(new EventHandler<ActionEvent>()
-    {
-      @Override
-      public void handle(ActionEvent event)
-      {
-        dockNode.setMinimized(true);
-      }
-    });
+    minimizeButton.setOnAction(event -> dockNode.setMinimized(true));
 
     this.addEventHandler(MouseEvent.MOUSE_PRESSED, this);
     this.addEventHandler(MouseEvent.DRAG_DETECTED, this);
@@ -136,41 +113,27 @@ public class DockTitleBar extends HBox
     HBox.setHgrow(fillPane, Priority.ALWAYS);
 
     dockNode.closableProperty()
-            .addListener(new ChangeListener<Boolean>()
-            {
-              @Override
-              public void changed(ObservableValue<? extends Boolean> observable,
-                                  Boolean oldValue,
-                                  Boolean newValue)
+            .addListener((observable, oldValue, newValue) -> {
+              if (newValue)
               {
-                if (newValue)
-                {
-                  if (!getChildren().contains(closeButton))
-                    getChildren().add(closeButton);
-                }
-                else
-                {
-                  getChildren().removeIf(c -> c.equals(closeButton));
-                }
+                if (!getChildren().contains(closeButton))
+                  getChildren().add(closeButton);
+              }
+              else
+              {
+                getChildren().removeIf(c -> c.equals(closeButton));
               }
             });
 
     dockNode.minimizableProperty()
-            .addListener(new ChangeListener<Boolean>()
-            {
-              @Override
-              public void changed(ObservableValue<? extends Boolean> observable,
-                                  Boolean oldValue,
-                                  Boolean newValue)
+            .addListener((observable, oldValue, newValue) -> {
+              if (newValue)
               {
-                if (newValue)
-                {
-                  getChildren().add(2, minimizeButton);
-                }
-                else
-                {
-                  getChildren().remove(minimizeButton);
-                }
+                getChildren().add(2, minimizeButton);
+              }
+              else
+              {
+                getChildren().remove(minimizeButton);
               }
             });
     getChildren().addAll(label, fillPane, stateButton, closeButton);
@@ -255,7 +218,7 @@ public class DockTitleBar extends HBox
    * The current node being dragged over for each window so we can keep track of
    * enter/exit events.
    */
-  private HashMap<Window, Node> dragNodes =
+  private final HashMap<Window, Node> dragNodes =
                                           new HashMap<Window, Node>();
 
   /**

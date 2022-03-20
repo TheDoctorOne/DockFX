@@ -1,10 +1,15 @@
 package org.dockfx;
 
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -12,6 +17,7 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -38,10 +44,44 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         public String getTitle() {
             return customTitle == null ? controller.getDockTitle() : customTitle;
         }
+
+        // Need this for "contains()" checks.
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof DockableFXML) {
+                // Most accurate duplication check(?).
+                // Other stuff would be same but dockNode has to be different, so display can be unique?.
+                return ((DockableFXML) obj).dockNode.equals(this.dockNode);
+            }
+            if(obj instanceof DockableNode) {
+                return ((DockableNode) obj).getDockNode().equals(this.dockNode);
+            }
+            return super.equals(obj);
+        }
     }
 
     protected final List<DockableFXML> dockables = new ArrayList<>();
     protected ResourceBundle resourceBundle;
+
+    public BasicFXMLDockPaneAdapter() {
+        super();
+        this.undockedNodes.addListener((ListChangeListener<DockNode>) c -> {
+            if(c.next()) {
+                List<? extends DockNode> removed = c.getRemoved();
+                List<? extends DockNode> added = c.getAddedSubList();
+
+                for (DockNode add : added) {
+                    checkAndAddNode(add);
+                }
+
+                for (DockNode remove : removed) {
+                    if (remove.isClosed()) {
+                        dockables.removeAll(Collections.singletonList(remove));
+                    }
+                }
+            }
+        });
+    }
 
     /**
      * FXMLs will use this resourceBundle. Set this first, will not update previously loaded FXMLs.
@@ -99,10 +139,24 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
 
         DockableFXML dockableFXML = new DockableFXML(title, controllerClass, controller, FXML, dockNode);
 
+        dockables.add(dockableFXML); // Call this first!. Because dock method also updates the dockables to avoid duplicates.
         dockNode.dock(this, controller.getDocPos());
-        dockables.add(dockableFXML);
 
         return controller;
+    }
+
+    protected void checkAndAddNode(Node node) {
+        if(node instanceof DockNode && !checkListContains(dockables, node)) {
+            DockNode tmp = (DockNode) node;
+            dockables.add(new DockableFXML(tmp.getTitle(), DockNode.class, tmp, null, tmp));
+        }
+    }
+
+
+    @Override
+    void dock(Node node, DockPos dockPos, Node sibling) {
+        checkAndAddNode(node);
+        super.dock(node, dockPos, sibling);
     }
 
     public List<DockableNode> getDockableNode(Class<? extends  DockableNode> nodeClass) {
@@ -154,6 +208,14 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         createNodeBar(filterList(dockables, filter), childrenList, base, showText);
     }
 
+    private static <T> boolean checkListContains(List<T> list, Object o) {
+        for(T t : list) {
+            if(t.equals(o))
+                return true;
+        }
+        return false;
+    }
+
     private static List<DockableFXML> filterList(List<DockableFXML> dockables, Class<? extends DockableNode> filter) {
         List<DockableFXML> res = new ArrayList<>();
         dockables.forEach(dockableFXML -> {
@@ -168,37 +230,48 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         dockables.forEach(dockableFXML -> {
             try {
                 DockableNode dNode = dockableFXML.controller;
-                ButtonBase b = base.newInstance();
-                b.setText(showText ? dockableFXML.getTitle() : "");
-                b.setGraphic(dNode.getGraphic());
+                ButtonBase buttonBase = base.newInstance();
+                buttonBase.setText(showText ? dockableFXML.getTitle() : "");
+                ImageView imageView = (ImageView) dockableFXML.dockNode.graphicProperty().getValue();
+                // Wrapping it inside "new" because it is also getting used by another field. If not wrap, then it won't render the graphic. Same goes with the MenuItems.
+                buttonBase.setGraphic(new ImageView(imageView.getImage()));
 
-                b.setOnAction(event -> {
+                dockableFXML.dockNode.graphicProperty().addListener((observable, oldValue, newValue) -> {
+                    if(newValue instanceof ImageView) {
+                        ImageView newImage = (ImageView) newValue;
+                        buttonBase.setGraphic(new ImageView(newImage.getImage()));
+                    } else if(newValue == null) {
+                        buttonBase.setGraphic(null);
+                    }
+                });
+
+                buttonBase.setOnAction(event -> {
                     if (dockableFXML.dockNode.isClosed()) {
                         dockableFXML.dockNode.restore(dNode.getDockPane());
                     } else {
                         dockableFXML.dockNode.close();
                     }
-                    if(b instanceof CheckBox) {
-                        ((CheckBox)b).setSelected(!dockableFXML.dockNode.isClosed());
+                    if(buttonBase instanceof CheckBox) {
+                        ((CheckBox)buttonBase).setSelected(!dockableFXML.dockNode.isClosed());
                     } else {
-                        b.setDisable(!dockableFXML.dockNode.isClosed());
+                        buttonBase.setDisable(!dockableFXML.dockNode.isClosed());
                     }
                 });
 
                 dNode.getCloseProperty().addListener((observable, oldValue, newValue) -> {
-                    if(b instanceof CheckBox) {
-                        ((CheckBox)b).setSelected(!newValue);
+                    if(buttonBase instanceof CheckBox) {
+                        ((CheckBox)buttonBase).setSelected(!newValue);
                     } else {
-                        b.setDisable(!newValue);
+                        buttonBase.setDisable(!newValue);
                     }
                 });
 
-                if(b instanceof CheckBox) {
-                    ((CheckBox)b).setSelected(!dNode.getCloseProperty().getValue());
+                if(buttonBase instanceof CheckBox) {
+                    ((CheckBox)buttonBase).setSelected(!dNode.getCloseProperty().getValue());
                 } else {
-                    b.setDisable(!dNode.getCloseProperty().getValue());
+                    buttonBase.setDisable(!dNode.getCloseProperty().getValue());
                 }
-                childrenList.add(b);
+                childrenList.add(buttonBase);
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -209,37 +282,47 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         dockables.forEach(dockableFXML -> {
             try {
                 DockableNode dNode = dockableFXML.controller;
-                MenuItem b = base.newInstance();
-                b.setText(showText ? dockableFXML.getTitle() : "");
-                b.setGraphic(dNode.getGraphic());
+                MenuItem menuItem = base.newInstance();
+                menuItem.setText(showText ? dockableFXML.getTitle() : "");
+                ImageView imageView = (ImageView) dockableFXML.dockNode.graphicProperty().getValue();
+                menuItem.setGraphic(new ImageView(imageView.getImage()));
 
-                b.setOnAction(event -> {
+                dockableFXML.dockNode.graphicProperty().addListener((observable, oldValue, newValue) -> {
+                    if(newValue instanceof ImageView) {
+                        ImageView newImage = (ImageView) newValue;
+                        menuItem.setGraphic(new ImageView(newImage.getImage()));
+                    } else if(newValue == null) {
+                        menuItem.setGraphic(null);
+                    }
+                });
+                
+                menuItem.setOnAction(event -> {
                     if (dockableFXML.dockNode.isClosed()) {
                         dockableFXML.dockNode.restore(dNode.getDockPane());
                     } else {
                         dockableFXML.dockNode.close();
                     }
-                    if(b instanceof CheckMenuItem) {
-                        ((CheckMenuItem)b).setSelected(!dockableFXML.dockNode.isClosed());
+                    if(menuItem instanceof CheckMenuItem) {
+                        ((CheckMenuItem)menuItem).setSelected(!dockableFXML.dockNode.isClosed());
                     } else {
-                        b.setDisable(!dockableFXML.dockNode.isClosed());
+                        menuItem.setDisable(!dockableFXML.dockNode.isClosed());
                     }
                 });
 
                 dNode.getCloseProperty().addListener((observable, oldValue, newValue) -> {
-                    if(b instanceof CheckMenuItem) {
-                        ((CheckMenuItem)b).setSelected(!newValue);
+                    if(menuItem instanceof CheckMenuItem) {
+                        ((CheckMenuItem)menuItem).setSelected(!newValue);
                     } else {
-                        b.setDisable(!newValue);
+                        menuItem.setDisable(!newValue);
                     }
                 });
 
-                if(b instanceof CheckMenuItem) {
-                    ((CheckMenuItem)b).setSelected(!dNode.getCloseProperty().getValue());
+                if(menuItem instanceof CheckMenuItem) {
+                    ((CheckMenuItem)menuItem).setSelected(!dNode.getCloseProperty().getValue());
                 } else {
-                    b.setDisable(!dNode.getCloseProperty().getValue());
+                    menuItem.setDisable(!dNode.getCloseProperty().getValue());
                 }
-                childrenList.add(b);
+                childrenList.add(menuItem);
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }

@@ -1,9 +1,8 @@
 package org.dockfx;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-
-
 
 /**
  * Currently name is misleading. {@link DockNode} is the only real DockableNode.<br>
@@ -44,7 +43,7 @@ public interface DockableNode {
     /**
      * Dockable's Icon
      * */
-    default ImageView getGraphic() {
+    default Node getGraphic() {
         return new ImageView(DockPane.class.getResource("docknode.png").toExternalForm());
     }
 

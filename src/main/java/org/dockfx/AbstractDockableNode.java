@@ -41,4 +41,5 @@ public abstract class AbstractDockableNode implements DockableNode {
     public DockNode getDockNode() {
         return mDockNode;
     }
+
 }

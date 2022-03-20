@@ -1,21 +1,19 @@
 package org.dockfx.demo.controllers;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import org.dockfx.BasicFXMLDockPaneAdapter;
-import org.dockfx.DelayOpenHandler;
-import org.dockfx.DockPane;
-import org.dockfx.DockableNode;
+import org.dockfx.*;
 import org.dockfx.demo.DockFX;
 
 import java.io.IOException;
@@ -42,18 +40,25 @@ public class DemoMainFXML extends Application implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         dockPaneAdapter.wrapInAnchorPane(dockAnchorPane);
         try {
-            dockPaneAdapter.addDockableFXML(DemoFXML2.class, "DemoFXML2.fxml");
+
+            DockNode n1 = DockFX.generateRandomDockableTree("Random Tree", DockFX.getDockImage());
+            n1.dock(dockPaneAdapter, DockPos.LEFT);
+
+            DockableNode n2 = dockPaneAdapter.addDockableFXML(DemoFXML2.class, "DemoFXML2.fxml");
             double customDivideRatio = 5;
             dockPaneAdapter.addDockableFXML("FXML2", customDivideRatio, DemoFXML2.class, "DemoFXML2.fxml");
+
             dummyBar.setSpacing(3);
             dummyBar.getChildren().clear();
-            dockPaneAdapter.createNodeBar(dummyBar, Button.class, false);
+            dockPaneAdapter.createNodeBar(dummyBar, Button.class, true);
 
             DockableNode dNode = dockPaneAdapter.addDockableFXML("Demo1", DemoFXML.class, "DemoFXML.fxml");
             dockPaneAdapter.addDockableFXML("Demo2", DemoFXML.class, "DemoFXML.fxml");
             dockPaneAdapter.createMenuItems(DemoFXML.class, menu.getItems(), CheckMenuItem.class, true);
+            dockPaneAdapter.createMenuItems(DockNode.class, menu.getItems(), MenuItem.class, true);
 
             List<BasicFXMLDockPaneAdapter.DockableFXML> dFxml = dockPaneAdapter.getDockableFXML(DemoFXML.class);
+            System.out.println(dFxml.size());
 
             // Update divide ratio after dock.
             dNode.getDockNode().setScreenDivideRatioOnDock(4);

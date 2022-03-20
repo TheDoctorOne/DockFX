@@ -1,14 +1,10 @@
 package org.dockfx.demo.controllers;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
 import org.dockfx.AbstractDockableNode;
-import org.dockfx.DockPane;
 import org.dockfx.DockPos;
-import org.dockfx.DockableNode;
 
 import java.net.URL;
 import java.util.ResourceBundle;

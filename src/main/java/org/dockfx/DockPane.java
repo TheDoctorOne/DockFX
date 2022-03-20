@@ -20,20 +20,7 @@
 
 package org.dockfx;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.sun.javafx.css.StyleManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -56,13 +43,17 @@ import javafx.stage.Popup;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import com.sun.javafx.css.StyleManager;
-
 import org.dockfx.pane.ContentPane;
 import org.dockfx.pane.ContentSplitPane;
 import org.dockfx.pane.ContentTabPane;
 import org.dockfx.pane.DockNodeTab;
+
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for a dock pane that provides the layout of the dock nodes.
@@ -112,31 +103,31 @@ public class DockPane extends StackPane
    * The docking area shape with a dotted animated border on the indicator
    * overlay popup.
    */
-  private Rectangle dockAreaIndicator;
+  private final Rectangle dockAreaIndicator;
   /**
    * The timeline used to animate the borer of the docking area indicator shape.
    * Because JavaFX has no CSS styling for timelines/animations yet we will make
    * this private and offer an accessor for the user to programmatically modify
    * the animation or disable it.
    */
-  private Timeline dockAreaStrokeTimeline;
+  private final Timeline dockAreaStrokeTimeline;
   /**
    * The popup used to display the root dock indicator buttons and the docking
    * area indicator.
    */
-  private Popup dockIndicatorOverlay;
+  private final Popup dockIndicatorOverlay;
 
   /**
    * The grid pane used to lay out the local dock indicator buttons. This is the
    * grid used to lay out the buttons in the circular indicator.
    */
-  private GridPane dockPosIndicator;
+  private final GridPane dockPosIndicator;
   /**
    * The popup used to display the local dock indicator buttons. This allows
    * these indicator buttons to be displayed outside the window of this dock
    * pane.
    */
-  private Popup dockIndicatorPopup;
+  private final Popup dockIndicatorPopup;
 
   /**
    * Base class for a dock indicator button that allows it to be displayed
@@ -218,9 +209,9 @@ public class DockPane extends StackPane
    * A collection used to manage the indicator buttons and automate hit
    * detection during DOCK_OVER events.
    */
-  private ObservableList<DockPosButton> dockPosButtons;
+  protected ObservableList<DockPosButton> dockPosButtons;
 
-  private ObservableList<DockNode> undockedNodes;
+  protected ObservableList<DockNode> undockedNodes;
 
   /**
    * Creates a new DockPane adding event handlers for dock events and creating
@@ -407,7 +398,7 @@ public class DockPane extends StackPane
    * A cache of all dock node event handlers that we have created for tracking
    * the current docking area.
    */
-  private ObservableMap<Node, DockNodeEventHandler> dockNodeEventFilters =
+  private final ObservableMap<Node, DockNodeEventHandler> dockNodeEventFilters =
                                                                          FXCollections.observableHashMap();
 
   /**
@@ -473,10 +464,7 @@ public class DockPane extends StackPane
       pane = new ContentSplitPane(node);
       root = (Node) pane;
       this.getChildren().add(root);
-      if (undockedNodes.contains(node))
-      {
-        undockedNodes.remove(node);
-      }
+      undockedNodes.remove(node);
       return;
     }
 
@@ -644,10 +632,7 @@ public class DockPane extends StackPane
     // Add a node to the proper pane
     pane.addNode(root, sibling, node, dockPos);
 
-    if (undockedNodes.contains(node))
-    {
-      undockedNodes.remove(node);
-    }
+    undockedNodes.remove(node);
   }
 
   /**
@@ -699,7 +684,7 @@ public class DockPane extends StackPane
         {
           if (root == pane)
           {
-            this.getChildren().remove((Node) pane);
+            this.getChildren().remove(pane);
             root = null;
           }
         }

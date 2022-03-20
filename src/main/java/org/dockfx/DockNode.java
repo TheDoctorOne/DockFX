@@ -20,12 +20,7 @@
 
 package org.dockfx;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -41,12 +36,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
-
+import javafx.stage.*;
 import org.dockfx.pane.DockNodeTab;
 import org.dockfx.viewControllers.DockFXViewController;
 
@@ -58,7 +48,7 @@ import org.dockfx.viewControllers.DockFXViewController;
  * 
  * @since DockFX 0.1
  */
-public class DockNode extends VBox implements EventHandler<MouseEvent>
+public class DockNode extends VBox implements EventHandler<MouseEvent>, DockableNode
 {
   /**
    * The style this dock node should use on its stage when set to floating.
@@ -137,7 +127,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
    * 
    * @defaultValue false
    */
-  private BooleanProperty maximizedProperty =
+  private final BooleanProperty maximizedProperty =
                                             new SimpleBooleanProperty(false)
                                             {
 
@@ -677,6 +667,36 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     setFloating(floating, null, dockPane);
   }
 
+  @Override
+  public BooleanProperty getCloseProperty() {
+    return closedProperty;
+  }
+
+  @Override
+  public String getDockTitle() {
+    return getTitle();
+  }
+
+  @Override
+  public DockPos getDocPos() {
+    return getDocPos();
+  }
+
+  @Override
+  public void setDockNode(DockNode dockNode) {
+    // This can't be set, since it is the dock node itself.
+  }
+
+  @Override
+  public DockNode getDockNode() {
+    return this;
+  }
+
+  @Override
+  public void setDockPane(DockPane dockPane) {
+    this.dockPane = dockPane;
+  }
+
   /**
    * The dock pane that was last associated with this dock node. Either the dock
    * pane that it is currently docked to or the one it was detached from. Can be
@@ -752,7 +772,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return graphicProperty;
   }
 
-  private ObjectProperty<Node> graphicProperty =
+  private final ObjectProperty<Node> graphicProperty =
                                                new SimpleObjectProperty<Node>()
                                                {
                                                  @Override
@@ -783,7 +803,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return titleProperty;
   }
 
-  private StringProperty titleProperty =
+  private final StringProperty titleProperty =
                                        new SimpleStringProperty("Dock")
                                        {
                                          @Override
@@ -815,7 +835,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return customTitleBarProperty;
   }
 
-  private BooleanProperty customTitleBarProperty =
+  private final BooleanProperty customTitleBarProperty =
                                                  new SimpleBooleanProperty(true)
                                                  {
                                                    @Override
@@ -850,7 +870,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return floatingProperty;
   }
 
-  private BooleanProperty floatingProperty =
+  private final BooleanProperty floatingProperty =
                                            new SimpleBooleanProperty(false)
                                            {
                                              @Override
@@ -889,7 +909,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return floatableProperty;
   }
 
-  private BooleanProperty floatableProperty =
+  private final BooleanProperty floatableProperty =
                                             new SimpleBooleanProperty(true)
                                             {
                                               @Override
@@ -923,7 +943,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return closableProperty;
   }
 
-  private BooleanProperty closableProperty =
+  private final BooleanProperty closableProperty =
                                            new SimpleBooleanProperty(true)
                                            {
                                              @Override
@@ -970,7 +990,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return minimizableProperty;
   }
 
-  private BooleanProperty minimizableProperty =
+  private final BooleanProperty minimizableProperty =
                                               new SimpleBooleanProperty(false)
                                               {
                                                 @Override
@@ -1000,7 +1020,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return stageResizableProperty;
   }
 
-  private BooleanProperty stageResizableProperty =
+  private final BooleanProperty stageResizableProperty =
                                                  new SimpleBooleanProperty(true)
                                                  {
                                                    @Override
@@ -1032,7 +1052,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return dockedProperty;
   }
 
-  private BooleanProperty dockedProperty =
+  private final BooleanProperty dockedProperty =
                                          new SimpleBooleanProperty(false)
                                          {
                                            @Override
@@ -1089,7 +1109,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return tabbedProperty;
   }
 
-  private BooleanProperty tabbedProperty =
+  private final BooleanProperty tabbedProperty =
                                          new SimpleBooleanProperty(false)
                                          {
                                            @Override
@@ -1131,7 +1151,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent>
     return closedProperty;
   }
 
-  private BooleanProperty closedProperty =
+  private final BooleanProperty closedProperty =
                                          new SimpleBooleanProperty(false)
                                          {
                                            @Override

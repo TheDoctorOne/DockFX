@@ -21,36 +21,28 @@
 
 package org.dockfx.demo;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Random;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
-
 import org.dockfx.DockNode;
 import org.dockfx.DockPane;
 import org.dockfx.DockPos;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Random;
 
 public class DockFX extends Application
 {
@@ -205,7 +197,17 @@ public class DockFX extends Application
     // StyleManager class
   }
 
-  private TreeView<String> generateRandomTree()
+
+  public static ImageView getDockImage() {
+    return new ImageView(DockPane.class.getResource("docknode.png")
+            .toExternalForm());
+  }
+
+  public static DockNode generateRandomDockableTree(String title, ImageView imageView) {
+    return new DockNode(generateRandomTree(), title, imageView);
+  }
+
+  public static TreeView<String> generateRandomTree()
   {
     // create a demonstration tree view to use as the contents for a dock node
     TreeItem<String> root = new TreeItem<String>("Root");
