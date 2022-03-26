@@ -22,8 +22,15 @@ public interface DockableNode {
      * */
     BooleanProperty getCloseProperty();
 
+    /**
+     * The initial title. Changing the return value won't effect the Title. <br>
+     * See getDockNode().setTitle()
+     * */
     String getDockTitle();
 
+    /**
+     * The initial DocPos. Changing the return value won't effect the Title.
+     * */
     DockPos getDocPos();
 
     /**

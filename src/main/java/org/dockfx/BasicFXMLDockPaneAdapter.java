@@ -22,10 +22,16 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Loads from FXML.
+ * Basic FXML Wrapper, loader. <br>
+ * Keeps all the loaded FXML files inside a list. Be sure to remove them, if you don't need them anymore.
+ * <br>
+ * See <code>unloadDockable(DockableNode)</code> method.
  * */
 public class BasicFXMLDockPaneAdapter extends DockPane {
 
+    /**
+     * Holds the initialization parameters of the Loaded FXML.
+     * */
     public static class DockableFXML {
         private final String fxml;
         private final String customTitle;
@@ -33,7 +39,12 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         public final DockNode dockNode;
         public final DockableNode controller;
 
-        private DockableFXML(String customTitle, Class<? extends DockableNode> mClass, DockableNode controller, String fxml, DockNode dockNode) {
+        protected DockableFXML(String customTitle
+                , Class<? extends DockableNode> mClass
+                , DockableNode controller
+                , String fxml
+                , DockNode dockNode
+        ) {
             this.fxml = fxml;
             this.customTitle = customTitle;
             this.dockNode = dockNode;
@@ -41,7 +52,11 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
             this.mClass = mClass;
         }
 
-        public String getTitle() {
+        /**
+         * This is for internal use only. As it may provide wrong title. <br>
+         * Use <code>dockNode.getTitle()</code> for more accurate result.
+         * */
+        protected String getTitle() {
             return customTitle == null ? controller.getDockTitle() : customTitle;
         }
 
@@ -190,7 +205,26 @@ public class BasicFXMLDockPaneAdapter extends DockPane {
         return res;
     }
 
+    public DockableFXML getDockableFXML(DockableNode node) {
+        for(DockableFXML dockableFXML : dockables) {
+            if(dockableFXML.controller == node) {
+                return dockableFXML;
+            }
+        }
+        return null;
+    }
 
+    /**
+     * Unload the FXML from the memory. As it may keep the reference. <br>
+     * Therefore Garbage Collector won't be able to clear the memory. <br>
+     * Which may cause memory leak. <br>
+     *     <br>
+     * <b>Be aware! This method only removes the <i>node</i> from the <br>
+     * internal list and will not close or remove the <i>node</i> itself.</b>
+     * */
+    public boolean unloadDockable(DockableNode node) {
+        return dockables.removeAll(Collections.singletonList(getDockableFXML(node)));
+    }
 
     public void createMenuItems(ObservableList<MenuItem> childrenList, Class<? extends MenuItem> base, boolean showText) {
         createMenuItems(dockables, childrenList, base, showText);

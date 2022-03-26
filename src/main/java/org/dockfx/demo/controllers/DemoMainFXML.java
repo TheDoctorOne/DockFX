@@ -48,6 +48,8 @@ public class DemoMainFXML extends Application implements Initializable {
             double customDivideRatio = 5;
             dockPaneAdapter.addDockableFXML("FXML2", customDivideRatio, DemoFXML2.class, "DemoFXML2.fxml");
 
+            dockPaneAdapter.unloadDockable(n2); // Unloading it will prevent it to get shown in the "nodeBar" that'll get generated below.
+
             dummyBar.setSpacing(3);
             dummyBar.getChildren().clear();
             dockPaneAdapter.createNodeBar(dummyBar, Button.class, true);
@@ -90,7 +92,7 @@ public class DemoMainFXML extends Application implements Initializable {
         });
 
         primaryStage.setOnShown(event -> {
-            controller.getDockPaneAdapter().loadPreference(CONFIG_FILE, false);
+//            controller.getDockPaneAdapter().loadPreference(CONFIG_FILE, false);
         });
 
         primaryStage.show();
