@@ -48,7 +48,7 @@ import org.dockfx.viewControllers.DockFXViewController;
  * 
  * @since DockFX 0.1
  */
-public class DockNode extends VBox implements EventHandler<MouseEvent>, DockableNode
+public class DockNode extends VBox implements EventHandler<MouseEvent>, DockableNodeController
 {
   /**
    * The style this dock node should use on its stage when set to floating.

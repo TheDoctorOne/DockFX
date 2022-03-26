@@ -44,7 +44,7 @@ public class DemoMainFXML extends Application implements Initializable {
             DockNode n1 = DockFX.generateRandomDockableTree("Random Tree", DockFX.getDockImage());
             n1.dock(dockPaneAdapter, DockPos.LEFT);
 
-            DockableNode n2 = dockPaneAdapter.addDockableFXML(DemoFXML2.class, "DemoFXML2.fxml");
+            DockableNodeController n2 = dockPaneAdapter.addDockableFXML(DemoFXML2.class, "DemoFXML2.fxml");
             double customDivideRatio = 5;
             dockPaneAdapter.addDockableFXML("FXML2", customDivideRatio, DemoFXML2.class, "DemoFXML2.fxml");
 
@@ -54,7 +54,7 @@ public class DemoMainFXML extends Application implements Initializable {
             dummyBar.getChildren().clear();
             dockPaneAdapter.createNodeBar(dummyBar, Button.class, true);
 
-            DockableNode dNode = dockPaneAdapter.addDockableFXML("Demo1", DemoFXML.class, "DemoFXML.fxml");
+            DockableNodeController dNode = dockPaneAdapter.addDockableFXML("Demo1", DemoFXML.class, "DemoFXML.fxml");
             dockPaneAdapter.addDockableFXML("Demo2", DemoFXML.class, "DemoFXML.fxml");
             dockPaneAdapter.createMenuItems(DemoFXML.class, menu.getItems(), CheckMenuItem.class, true);
             dockPaneAdapter.createMenuItems(DockNode.class, menu.getItems(), MenuItem.class, true);

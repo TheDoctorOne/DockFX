@@ -3,14 +3,14 @@ package org.dockfx.demo.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;
-import org.dockfx.AbstractDockableNode;
+import org.dockfx.AbstractDockableNodeController;
 import org.dockfx.DockPos;
-import org.dockfx.DockableNode;
+import org.dockfx.DockableNodeController;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class DemoFXML extends AbstractDockableNode implements DockableNode,Initializable {
+public class DemoFXML extends AbstractDockableNodeController implements DockableNodeController,Initializable {
 
     @FXML
     private AnchorPane mainPane;

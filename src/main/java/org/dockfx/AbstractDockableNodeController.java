@@ -3,7 +3,7 @@ package org.dockfx;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
-public abstract class AbstractDockableNode implements DockableNode {
+public abstract class AbstractDockableNodeController implements DockableNodeController {
 
     protected BooleanProperty closeProperty = new SimpleBooleanProperty(false);
     protected DockPane mDockPane;

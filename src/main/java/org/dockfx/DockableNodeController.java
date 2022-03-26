@@ -5,10 +5,11 @@ import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 
 /**
- * Currently name is misleading. {@link DockNode} is the only real DockableNode.<br>
- * This interface is just a helper for the {@link BasicFXMLDockPaneAdapter}.
+ * setDockNode({@link DockNode}) and setDockPane({@link DockPane}) will be <br>
+ * called by {@link BasicFXMLDockPaneAdapter} when loading the FXML File.  <br>
+ * Be sure to return them with getDockNode() and getDockPane()
  * */
-public interface DockableNode {
+public interface DockableNodeController {
 
     /**
      * On dockable closed property. <br>
